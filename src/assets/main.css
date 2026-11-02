@@ -1,0 +1,227 @@
+@import 'tailwindcss';
+@import 'lenis/dist/lenis.css';
+@import './brand/brand-tokens.v2.css';
+
+/* Brand palette only (PDF p15): the default Tailwind colours are removed on purpose. */
+@theme {
+  --color-*: initial;
+  --color-black: #000000;
+  --color-grey-dark: #404040;
+  --color-grey-medium: #808080;
+  --color-grey-light: #bfbfbf;
+  --color-grey-tint: #dfdfdf;
+  --color-white: #ffffff;
+
+  --font-sans: 'Creato Display', 'Creato Display Fallback', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* Side margin of the page content (about 5 % of the width, like normcph.com). */
+  --spacing-page: clamp(16px, 5vw, 96px);
+}
+
+/* Fluid type scale, grid unit and card ratio from brand-tokens.v2.css. */
+@theme inline {
+  --text-hero: var(--tlp-fs-hero);
+  --text-hero--line-height: 1.2;
+  --text-display: var(--tlp-fs-display);
+  --text-display--line-height: 1.2;
+  --text-h1: var(--tlp-fs-h1);
+  --text-h1--line-height: 1.2;
+  --text-lead: var(--tlp-fs-lead);
+  --text-lead--line-height: 1.2;
+  --text-h2: var(--tlp-fs-h2);
+  --text-h2--line-height: 1.2;
+  --text-caption: var(--tlp-fs-caption);
+  --text-caption--line-height: 1.2;
+  --text-small: var(--tlp-fs-small);
+  --text-small--line-height: 1.2;
+
+  --spacing-unit: var(--tlp-unit);
+  --aspect-card: var(--tlp-card-ratio);
+}
+
+@layer base {
+  html {
+    font-kerning: normal;
+    -webkit-font-smoothing: antialiased;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    @apply bg-white font-sans text-black;
+  }
+
+  :focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    @apply bg-black text-white;
+  }
+}
+
+@layer components {
+  /* Header and menu links: underline grows from the left on hover, stays on the active item. */
+  .nav-link,
+  .link-underline,
+  .menu-link {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0 1px;
+    transition: background-size 0.35s ease;
+  }
+
+  .nav-link:hover,
+  .nav-link.is-active,
+  .link-underline:hover,
+  .menu-link:hover,
+  .menu-link:focus-visible,
+  .menu-link.router-link-active {
+    background-size: 100% 1px;
+  }
+
+  .nav-link {
+    @apply py-1 text-[0.9375rem];
+  }
+
+  .menu-link {
+    @apply inline-block pb-1;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 border border-black bg-black px-6 py-3 text-base text-white transition-colors hover:bg-white hover:text-black disabled:cursor-wait disabled:opacity-60;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 border border-black px-6 py-3 text-base transition-colors hover:bg-black hover:text-white;
+  }
+
+  /* For black backgrounds and photos. */
+  .btn-light {
+    @apply inline-flex items-center justify-center gap-2 border border-white bg-white px-6 py-3 text-base text-black transition-colors hover:bg-transparent hover:text-white;
+  }
+
+  .icon-button {
+    @apply inline-flex size-12 items-center justify-center border border-black text-lg transition-colors hover:bg-black hover:text-white disabled:pointer-events-none disabled:opacity-25;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Route changes fade the page. */
+  .page-enter-active,
+  .page-leave-active {
+    transition: opacity 0.3s ease;
+  }
+
+  .page-enter-from,
+  .page-leave-to {
+    opacity: 0;
+  }
+
+  /* Centred label and value pairs split by a short rule (contact page). */
+  .stacked-pair {
+    @apply relative flex flex-col items-center gap-1 pt-12 first:pt-0;
+  }
+
+  .stacked-pair:not(:first-child)::before {
+    @apply absolute top-6 left-1/2 h-px w-5 -translate-x-1/2 bg-black/20;
+    content: '';
+  }
+
+  .field-label {
+    @apply text-sm text-grey-dark;
+  }
+
+  .field-input {
+    @apply w-full border-0 border-b border-black/30 bg-transparent px-0 py-2 text-lg transition-colors outline-none placeholder:text-grey-light focus:border-black;
+  }
+
+  .field-input[aria-invalid='true'] {
+    @apply border-black;
+  }
+
+  /* Long-form text from the CMS: justified like the brand guidelines on wide screens. */
+  .prose-body {
+    @apply flex flex-col gap-5 text-lg leading-relaxed text-grey-dark md:text-justify;
+    hyphens: auto;
+  }
+
+  /*
+   * Project grids: every image in a row has the same height, so a wide card
+   * (two columns) lines up with its neighbours. Heights follow the grid width
+   * through container units: (width - gaps) / columns at a 4:5 ratio.
+   */
+  .project-grid {
+    --cols: 1;
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    column-gap: var(--tlp-unit);
+    row-gap: 3.5rem;
+  }
+
+  .project-grid-media {
+    height: calc((100cqw - (var(--cols) - 1) * var(--tlp-unit)) / var(--cols) * 1.25);
+  }
+
+  .project-grid-wide .project-grid-media {
+    height: calc(100cqw / 1.5);
+  }
+
+  @media (width >= 40rem) {
+    .project-grid {
+      --cols: 2;
+    }
+
+    .project-grid-wide {
+      grid-column: span 2;
+    }
+
+    .project-grid-wide .project-grid-media {
+      height: calc((100cqw - (var(--cols) - 1) * var(--tlp-unit)) / var(--cols) * 1.25);
+    }
+  }
+
+  @media (width >= 64rem) {
+    .project-grid {
+      --cols: 3;
+    }
+  }
+
+  @media (width >= 80rem) {
+    .project-grid[data-columns='4'] {
+      --cols: 4;
+    }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal.is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
