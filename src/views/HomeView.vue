@@ -10,6 +10,7 @@ import ProjectCard from '@/components/ProjectCard.vue'
 import ProjectGrid from '@/components/ProjectGrid.vue'
 import ProjectHighlight from '@/components/ProjectHighlight.vue'
 import AppImage from '@/components/ui/AppImage.vue'
+import ErrorState from '@/components/ui/ErrorState.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { apiGet } from '@/lib/api'
 import { formatDate } from '@/lib/format'
@@ -49,8 +50,15 @@ const chapters = chapterLayouts.map((layout) => {
     return [...all.filter((project) => !latestIds.has(project.id)), ...all.filter((project) => latestIds.has(project.id))].slice(0, layout.count)
   })
 
-  return { ...layout, works }
+  return { ...layout, works, reload: response.reload }
 })
+
+/** Retries every section after the API failed. */
+function reloadAll(): void {
+  for (const section of [featured, latest, designers, press, ...chapters]) {
+    void section.reload()
+  }
+}
 
 /** A full-screen work between the chapters: the last featured one, so it differs from the first slide. */
 const highlight = computed(() => {
@@ -70,7 +78,8 @@ useHead({ title: '' })
     <div v-else-if="featured.loading.value" class="h-[75svh] min-h-[480px] animate-pulse bg-grey-tint md:h-[calc(100svh-4.5rem)]" />
 
     <HomeSection :title="t('home.latestWorks')" :side-label="t('home.recent')">
-      <ProjectGrid v-if="latest.data.value" :projects="latest.data.value.data" :columns="4" bento />
+      <ErrorState v-if="latest.error.value" @retry="reloadAll" />
+      <ProjectGrid v-else-if="latest.data.value" :projects="latest.data.value.data" :columns="4" bento />
       <ProjectGrid v-else :projects="[]" :columns="4" loading :placeholders="4" />
     </HomeSection>
 
